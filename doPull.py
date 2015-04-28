@@ -1,6 +1,6 @@
 from ROOT import *
 
-def doPull(data, dataName, mc, mcName, Type, varName, norm):
+def doPull(data, dataName, mc, mcName, Type, varName, norm, histName):
 	ROOT.gROOT.SetBatch()
 	data_nbins = data.GetNbinsX()
 	mc_nbins = mc.GetNbinsX()
@@ -48,12 +48,29 @@ def doPull(data, dataName, mc, mcName, Type, varName, norm):
 	if(max_mc < max_data):
 		mc.GetYaxis().SetRangeUser(0, max_data*1.1)
 		
-	pull_max = pull.GetMaximum()
-	pull_min = pull.GetMinimum()
-#	pull.GetYaxis().SetRangeUser( 100.2, -1.2)	
+	leg = TLegend(0.6,0.8,0.89,0.89)
+	leg.SetFillStyle(0)
+	leg.SetLineWidth(0)
+	leg.SetBorderSize(0)
+	if not dataName:
+		leg.AddEntry(data, "Data", "l")
+		leg.AddEntry(mc, "MC", "f")
+	if dataName:
+		leg.AddEntry(data, str(dataName), "l")
+		leg.AddEntry(mc, str(mcName), "f")
 
+	data.GetYaxis().SetTitleOffset(1.5)
+	mc.GetYaxis().SetTitleOffset(1.5)
+
+	c0 = TCanvas("c0", "c0", 1000, 800)
+	c0.cd()
+	mc.Draw()
+	data.Draw("same")
+	leg.Draw("same")
+	compare_name = str(histName) + "_compare.pdf"
+	c0.SaveAs(compare_name)
 	
-	ratio = 0.25
+	ratio = 0.3
 	epsilon = 0.10
 	c1 = TCanvas("c1", "c1", 800, 800)
 	SetOwnership(c1,False) #If I don't put this, I get memory leak problems...
@@ -66,18 +83,20 @@ def doPull(data, dataName, mc, mcName, Type, varName, norm):
 	p2.SetFillStyle(0)
 	p2.SetTopMargin(0.000)
 	SetOwnership(p2,False)
-	p2.SetBottomMargin(0.3)
+	p2.SetBottomMargin(0.35)
 	p2.SetGridx()
 	p2.SetGridy()
 		
-	data.GetYaxis().SetLabelSize(0.025)
+#	data.GetYaxis().SetLabelSize(0.025)
 	data.GetXaxis().SetLabelSize(0.0)
-	data.GetYaxis().SetTitleOffset(1.5)
+#	data.GetYaxis().SetTitleOffset(1.5)
 	data.GetYaxis().SetTitleSize(0.03)
-	mc.GetYaxis().SetLabelSize(0.025)
+#	mc.GetYaxis().SetLabelSize(0.025)
 	mc.GetXaxis().SetLabelSize(0.0)
 	mc.GetYaxis().SetTitleOffset(1.5)
 	mc.GetYaxis().SetTitleSize(0.03)
+
+	mc.SetMinimum(0.0001)
 	
 	pull.GetYaxis().SetNdivisions(8)
 	
@@ -87,34 +106,23 @@ def doPull(data, dataName, mc, mcName, Type, varName, norm):
 		st_ypull = str(dataName[0:4]) + ' - ' + str(mcName[0:4]) 
 		pull.GetYaxis().SetTitle(str(st_ypull))
 	pull.GetYaxis().SetTitleSize(0.08)
-	pull.GetYaxis().SetTitleOffset(0.35)
+	pull.GetYaxis().SetTitleOffset(0.5)
 			
 	if not varName:
 		pull.GetXaxis().SetTitle("")
 	if varName:
 		pull.GetXaxis().SetTitle(str(varName))
 		pull.GetXaxis().SetTitleSize(0.12)
-		pull.GetXaxis().SetTitleOffset(0.8)
+		pull.GetXaxis().SetTitleOffset(0.95)
 		data.SetTitle(varName)
 		mc.SetTitle(varName)
-	pull.GetXaxis().SetLabelSize(0.1)
-		
-	leg = TLegend(0.6,0.8,0.89,0.89)
-	leg.SetFillStyle(0)
-	leg.SetLineWidth(0)
-	leg.SetBorderSize(0)
-	
+
+	pull.GetXaxis().SetLabelSize(0.12)
+	pull.GetYaxis().SetLabelSize(0.05)		
 #	pull.GetYaxis().SetLimits(1.2, -1.2)	
 	pull.SetMaximum(0.007)
 	pull.SetMinimum(-0.007)
 
-	if not dataName:
-		leg.AddEntry(data, "Data", "l")
-		leg.AddEntry(mc, "MC", "f")
-	if dataName:
-		leg.AddEntry(data, str(dataName), "l")
-		leg.AddEntry(mc, str(mcName), "f")
-	
 	p1.cd()
 	mc.Draw()
 	data.Draw("same")
@@ -125,4 +133,5 @@ def doPull(data, dataName, mc, mcName, Type, varName, norm):
 	p1.Draw()
 	p2.Draw()
 	c1.Update()
-	c1.SaveAs("pull.pdf")
+	pull_name = str(histName) + "_pull.pdf"
+	c1.SaveAs(pull_name)

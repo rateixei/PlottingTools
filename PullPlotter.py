@@ -49,7 +49,7 @@ def main(argv):
 	mcF = TFile.Open(str(st_mcF), 'READ')
 	mcHist = mcF.Get(str(st_hist))
 	
-	doPull(dataHist, st_dataN, mcHist, st_mcN, 'minus', st_var, is_norm)
+	doPull(dataHist, st_dataN, mcHist, st_mcN, 'minus', st_var, is_norm, st_hist)
 
 if __name__ == "__main__":
 	main(sys.argv[1:])
